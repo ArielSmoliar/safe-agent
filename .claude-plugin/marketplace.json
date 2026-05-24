@@ -1,0 +1,29 @@
+{
+  "name": "safe-agent",
+  "owner": {
+    "name": "Ariel Smoliar",
+    "url": "https://github.com/ArielSmoliar"
+  },
+  "metadata": {
+    "description": "Security skills that make AI coding agents safe to run.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "safe-agent",
+      "source": "./",
+      "description": "5 security skills: skill verification, cost tracking, tool authorization, behavioral anomaly detection, and pre-execution safety checks.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Ariel Smoliar"
+      },
+      "license": "MIT",
+      "keywords": [
+        "security",
+        "safety",
+        "guardrails"
+      ],
+      "category": "security"
+    }
+  ]
+}

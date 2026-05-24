@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e293b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="shield" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22d3ee;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6366f1;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="300" rx="12" fill="url(#bg)"/>
+
+  <!-- Subtle grid pattern -->
+  <g opacity="0.04" stroke="#fff" stroke-width="0.5">
+    <line x1="0" y1="50" x2="900" y2="50"/>
+    <line x1="0" y1="100" x2="900" y2="100"/>
+    <line x1="0" y1="150" x2="900" y2="150"/>
+    <line x1="0" y1="200" x2="900" y2="200"/>
+    <line x1="0" y1="250" x2="900" y2="250"/>
+    <line x1="150" y1="0" x2="150" y2="300"/>
+    <line x1="300" y1="0" x2="300" y2="300"/>
+    <line x1="450" y1="0" x2="450" y2="300"/>
+    <line x1="600" y1="0" x2="600" y2="300"/>
+    <line x1="750" y1="0" x2="750" y2="300"/>
+  </g>
+
+  <!-- Shield icon -->
+  <g transform="translate(120, 90)">
+    <path d="M60 0 L120 30 L120 75 C120 110 95 135 60 150 C25 135 0 110 0 75 L0 30 Z"
+          fill="none" stroke="url(#shield)" stroke-width="3" opacity="0.9"/>
+    <path d="M60 15 L110 40 L110 75 C110 105 89 126 60 140 C31 126 10 105 10 75 L10 40 Z"
+          fill="url(#shield)" opacity="0.1"/>
+    <!-- Checkmark inside shield -->
+    <path d="M38 75 L54 91 L84 55" fill="none" stroke="url(#shield)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Title -->
+  <text x="290" y="120" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="52" font-weight="700" fill="#f8fafc" letter-spacing="-1">safe-agent</text>
+
+  <!-- Tagline -->
+  <text x="290" y="160" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="20" fill="#94a3b8">Security skills that make AI agents safe to run</text>
+
+  <!-- Accent line -->
+  <rect x="290" y="175" width="120" height="3" rx="1.5" fill="url(#accent)"/>
+
+  <!-- Skill pills -->
+  <g transform="translate(290, 200)">
+    <rect x="0" y="0" width="110" height="30" rx="15" fill="#22d3ee" opacity="0.15"/>
+    <text x="55" y="20" font-family="system-ui, monospace" font-size="12" fill="#22d3ee" text-anchor="middle">skill-verify</text>
+
+    <rect x="120" y="0" width="100" height="30" rx="15" fill="#818cf8" opacity="0.15"/>
+    <text x="170" y="20" font-family="system-ui, monospace" font-size="12" fill="#a5b4fc" text-anchor="middle">cost-guard</text>
+
+    <rect x="230" y="0" width="96" height="30" rx="15" fill="#818cf8" opacity="0.15"/>
+    <text x="278" y="20" font-family="system-ui, monospace" font-size="12" fill="#a5b4fc" text-anchor="middle">tool-guard</text>
+
+    <rect x="336" y="0" width="126" height="30" rx="15" fill="#22d3ee" opacity="0.15"/>
+    <text x="399" y="20" font-family="system-ui, monospace" font-size="12" fill="#22d3ee" text-anchor="middle">behavior-watch</text>
+
+    <rect x="472" y="0" width="126" height="30" rx="15" fill="#818cf8" opacity="0.15"/>
+    <text x="535" y="20" font-family="system-ui, monospace" font-size="12" fill="#a5b4fc" text-anchor="middle">pre-exec-check</text>
+  </g>
+
+  <!-- Bottom right: "Built on Flare + LOCO" -->
+  <text x="290" y="265" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#475569">Built on</text>
+  <text x="342" y="265" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#22d3ee" font-weight="600">Flare</text>
+  <text x="376" y="265" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#475569">anomaly detection +</text>
+  <text x="503" y="265" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#818cf8" font-weight="600">LOCO</text>
+  <text x="540" y="265" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="13" fill="#475569">multi-agent scheduling</text>
+</svg>
