@@ -7,6 +7,10 @@
 </p>
 
 <p align="center">
+  <a href="https://skills.sh/ArielSmoliar/safe-agent"><img src="https://skills.sh/b/ArielSmoliar/safe-agent" alt="skills.sh"></a>
+</p>
+
+<p align="center">
   <a href="#install">Install</a> &middot;
   <a href="#skills">Skills</a> &middot;
   <a href="#usage">Usage</a> &middot;
