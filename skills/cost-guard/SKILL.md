@@ -8,6 +8,7 @@ description: >-
   Trigger phrases: "set a budget", "track my spend", "cost limit",
   "how much have I spent", "token budget", "spending cap".
 argument-hint: "[budget-amount] [mode: reject|alert|downgrade]"
+allowed-tools: ""
 ---
 
 # Cost Guard

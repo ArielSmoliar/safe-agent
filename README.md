@@ -155,9 +155,19 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 
 ## Roadmap
 
-- [ ] Hook-based enforcement — Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
-- [ ] Cross-session memory — Track behavior baselines across sessions to detect drift over time
+**v0.2 — Cross-skill coordination**
+- [ ] Unified policy engine — behavior-watch detection triggers tool-guard restrictions automatically
+- [ ] Multi-command exfiltration detection — catch split `cat .env > /tmp/x && curl -d @/tmp/x` across separate commands
+- [ ] Pre-exec-check user-intent awareness — distinguish "user asked for force-push" from "agent decided to force-push"
+
+**v0.3 — Deeper coverage**
 - [ ] MCP server audit — Extend skill-verify to scan MCP server configurations for trust boundary violations
+- [ ] Hook-based enforcement — Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
+- [ ] Resource exhaustion detection — catch infinite loops, memory bombs, bandwidth abuse within single commands
+- [ ] Output/response tampering detection — detect if a malicious skill modifies tool output
+
+**v0.4 — Persistence and teams**
+- [ ] Cross-session memory — Track behavior baselines across sessions to detect drift over time
 - [ ] Team profiles — Shareable tool-guard presets for org-wide security policies
 
 ## License

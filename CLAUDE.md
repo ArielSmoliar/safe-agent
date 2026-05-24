@@ -9,11 +9,67 @@ Security skills for AI coding agents. This repo follows the agentskills.io stand
 - `skills/tool-guard/` — Tool call authorization and approval gates (from LOCO + Flare)
 - `skills/behavior-watch/` — Behavioral anomaly detection on agent actions (from Flare anomaly engine)
 - `skills/pre-exec-check/` — Pre-execution safety checks for destructive commands (from Flare heuristics)
+- `tests/fixtures/` — Test skills (safe and malicious) for validating skill-verify
 - `.claude-plugin/` — Plugin manifests for Claude Code marketplace
 
-## Development
+## How the skills compose
+
+The 5 skills form a defense-in-depth stack. Recommended usage order:
+
+1. **Before installing anything**: `/safe-agent:skill-verify` — audit the skill
+2. **At session start**: `/safe-agent:tool-guard profile careful` — restrict tool access
+3. **At session start**: `/safe-agent:cost-guard $N` — set a spend limit
+4. **During work**: `pre-exec-check` activates automatically on dangerous commands
+5. **Periodically or at session end**: `/safe-agent:behavior-watch` — audit what happened
+
+Cross-skill references:
+- `behavior-watch` suggests `tool-guard` and `cost-guard` actions in its remediation
+- `pre-exec-check` complements `tool-guard` (pre-exec-check catches dangerous commands
+  even when Bash is allowed; tool-guard gates the tool itself)
+- `skill-verify` is standalone — run it before the session, not during
+
+## Development guidelines
 
 - Skills are Markdown-first. Each skill is a `SKILL.md` file with YAML frontmatter.
 - Reference materials go in `references/` subdirectories.
 - Keep SKILL.md files under 500 lines / 5,000 tokens for progressive disclosure.
-- Test skills by running them against known-good and known-bad examples.
+- All skills that don't need external tools must declare `allowed-tools: ""` (zero permissions).
+- Only `skill-verify` needs tools (`Read Grep Glob Bash`) because it reads external files.
+
+## Testing skills
+
+Run each skill against real scenarios to validate:
+
+```
+# Test skill-verify against the included fixtures
+/safe-agent:skill-verify tests/fixtures/safe-skill
+/safe-agent:skill-verify tests/fixtures/malicious-exfiltration
+
+# Test cost-guard
+/safe-agent:cost-guard $1 reject
+# ... do some work, verify it stops at the limit
+
+# Test tool-guard
+/safe-agent:tool-guard profile readonly
+# ... try to edit a file, verify it refuses
+
+# Test behavior-watch
+# ... do various tool calls, then:
+/safe-agent:behavior-watch
+
+# Test pre-exec-check
+# ... ask the agent to run `rm -rf /` or `git push --force origin main`
+# ... verify it warns before proceeding
+```
+
+## Contributing new threat patterns
+
+To add a new detection pattern to `skill-verify`:
+
+1. Add the pattern to `skills/skill-verify/references/threat-patterns.md` under the
+   appropriate category
+2. Reference the pattern in `skills/skill-verify/SKILL.md` under the relevant phase
+3. Create a test fixture in `tests/fixtures/` demonstrating the pattern
+4. Test: run `/safe-agent:skill-verify tests/fixtures/your-new-fixture` and verify detection
+
+Threat patterns should be specific and include real code examples, not vague descriptions.

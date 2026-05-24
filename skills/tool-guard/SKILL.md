@@ -8,6 +8,7 @@ description: >-
   Trigger phrases: "restrict tools", "tool permissions", "block bash",
   "approval gate", "limit what you can do", "tool whitelist", "tool blacklist".
 argument-hint: "[allow|deny|gate] [tool-name]"
+allowed-tools: ""
 ---
 
 # Tool Guard

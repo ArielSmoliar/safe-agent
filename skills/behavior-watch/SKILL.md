@@ -8,6 +8,7 @@ description: >-
   Trigger phrases: "watch my agent", "behavior audit", "what has the agent
   been doing", "session activity report", "anomaly check", "agent activity".
 user-invocable: true
+allowed-tools: ""
 ---
 
 # Behavior Watch
@@ -107,17 +108,36 @@ Total tool calls: 67
   These are outside the project directory and not obviously related
   to the task "update the login form."
   Likely benign: checking tool configuration. But worth noting.
+  → Suggested action: `/safe-agent:tool-guard profile careful` to gate future
+    out-of-scope reads, or `/safe-agent:tool-guard deny Bash` if shell access
+    is not needed for this task.
 
 - [LOW] Frequency note (score: 28)
   18 Bash calls is higher than typical for a UI task.
   Breakdown: 8 npm test, 4 npm run build, 3 git status,
   2 git diff, 1 npx tsc. All task-relevant.
+  → No action needed.
 
 ### Verdict
 No critical or high-severity anomalies detected.
 All mutations (Edit/Write) are within the expected project scope.
 Session behavior is consistent with the stated task.
 ```
+
+## Remediation Suggestions
+
+Every MEDIUM or higher finding must include a `→ Suggested action:` line recommending
+a specific safe-agent skill to mitigate the risk:
+
+| Finding type | Suggested action |
+|---|---|
+| Scope anomaly (out-of-project access) | `/safe-agent:tool-guard profile careful` or deny specific tools |
+| Suspicious sequence (credential + network) | `/safe-agent:tool-guard deny Bash` immediately |
+| Excessive tool calls | `/safe-agent:cost-guard $N reject` to cap remaining spend |
+| Task drift | Ask the user to confirm the expanded scope |
+| First-seen sensitive file access | `/safe-agent:skill-verify` on any recently installed skills |
+
+For LOW findings, add `→ No action needed.` to keep the format consistent.
 
 ## Scoring Calibration
 

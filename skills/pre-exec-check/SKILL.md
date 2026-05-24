@@ -8,6 +8,7 @@ description: >-
   Trigger phrases: "check before running", "is this command safe",
   "safety check", "pre-execution review".
 user-invocable: false
+allowed-tools: ""
 ---
 
 # Pre-Execution Safety Check
