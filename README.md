@@ -37,22 +37,27 @@ safe-agent adds a verification step.
 
 ## Install
 
-**Claude Code plugin (recommended):**
+**Claude Code (plugin):**
 ```
 /plugin marketplace add ArielSmoliar/safe-agent
 /plugin install safe-agent
 ```
 
-**Manual:**
+**Antigravity / Gemini CLI / Cursor / Codex:**
 ```bash
 git clone https://github.com/ArielSmoliar/safe-agent.git
-cp -r safe-agent/skills/* .claude/skills/
+cp -r safe-agent/skills/* .claude/skills/      # Claude Code
+cp -r safe-agent/skills/* .antigravity/skills/  # Antigravity
+cp -r safe-agent/skills/* .cursor/skills/       # Cursor
+cp -r safe-agent/skills/* .codex/skills/        # Codex
 ```
 
-**skills.sh (multi-agent):**
+**skills.sh (any agent):**
 ```bash
 npx skills@latest add ArielSmoliar/safe-agent
 ```
+
+Skills use the universal SKILL.md format (agentskills.io standard) — they work with any compatible agent.
 
 ## Usage
 
