@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/hero.svg" alt="safe-agent — Security skills that make AI agents safe to run" width="900"/>
+  <img src="assets/hero.svg" alt="safe-agent - Security skills that make AI agents safe to run" width="900"/>
 </p>
 
 <p align="center">
@@ -15,11 +15,11 @@
 
 ---
 
-Not another "make your agent do security" tool. safe-agent protects you *from* your agent — catching malicious skills before you install them and dangerous commands before they execute.
+Not another "make your agent do security" tool. safe-agent protects you *from* your agent - catching malicious skills before you install them and dangerous commands before they execute.
 
 ## The Problem
 
-Snyk's ToxicSkills research found that **36.82% of AI agent skills** have at least one security flaw — including prompt injection, credential theft, and data exfiltration. OWASP now tracks agentic skills as a first-class attack surface.
+Snyk's ToxicSkills research found that **36.82% of AI agent skills** have at least one security flaw - including prompt injection, credential theft, and data exfiltration. OWASP now tracks agentic skills as a first-class attack surface.
 
 Every time you run `/plugin install` or `npx skills add`, you're trusting someone else's instructions inside your codebase, your shell, and your cloud credentials.
 
@@ -27,7 +27,7 @@ safe-agent adds a verification step.
 
 ## Threat Coverage
 
-safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Architecture, Threat Taxonomy, and Security Analysis*](https://arxiv.org/abs/2604.02837) (Li et al., 2026) — the first comprehensive academic security analysis of the Agent Skills framework, covering 7 threat categories and 17 attack scenarios across 3 layers:
+safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Architecture, Threat Taxonomy, and Security Analysis*](https://arxiv.org/abs/2604.02837) (Li et al., 2026) - the first comprehensive academic security analysis of the Agent Skills framework, covering 7 threat categories and 17 attack scenarios across 3 layers:
 
 | Layer | Category | safe-agent coverage |
 |---|---|---|
@@ -46,7 +46,7 @@ safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Archi
 | `/skill-verify` | Audit any skill for prompt injection, exfiltration, and malicious patterns before you install it | Flare + OWASP |
 | `/cost-guard` | Per-session token/dollar budget with reject/alert/downgrade modes | LOCO BudgetManager |
 | `/tool-guard` | Allowlist/denylist for tool calls, approval gates for destructive ops, preset profiles | LOCO + Flare |
-| `/behavior-watch` | Anomaly scoring on agent actions — flags unusual tool sequences, scope creep, first-seen patterns | Flare anomaly engine |
+| `/behavior-watch` | Anomaly scoring on agent actions - flags unusual tool sequences, scope creep, first-seen patterns | Flare anomaly engine |
 | `pre-exec-check` | Teaches the agent to pause and verify before destructive commands (rm -rf, force-push, DROP TABLE) | Flare heuristics |
 
 ## Install
@@ -71,7 +71,7 @@ cp -r safe-agent/skills/* .codex/skills/        # Codex
 npx skills@latest add ArielSmoliar/safe-agent
 ```
 
-Skills use the universal SKILL.md format (agentskills.io standard) — they work with any compatible agent.
+Skills use the universal SKILL.md format (agentskills.io standard) - they work with any compatible agent.
 
 ## Usage
 
@@ -125,9 +125,9 @@ Recommendation: Install with modifications (remove scripts/setup.sh)
 ```
 
 Tracks estimated spend and warns at 50%, 80%, and 100%. Three modes:
-- **reject** — stop work at the limit
-- **alert** — warn but continue (default)
-- **downgrade** — suggest cheaper approaches as you approach the limit
+- **reject** - stop work at the limit
+- **alert** - warn but continue (default)
+- **downgrade** - suggest cheaper approaches as you approach the limit
 
 ### Restrict tool access
 
@@ -144,7 +144,7 @@ Tracks estimated spend and warns at 50%, 80%, and 100%. Three modes:
 /behavior-watch
 ```
 
-Produces a session activity report with anomaly scoring — flags scope creep, unusual tool call frequencies, access to sensitive files, and suspicious sequences (e.g., read credentials then make a network call).
+Produces a session activity report with anomaly scoring - flags scope creep, unusual tool call frequencies, access to sensitive files, and suspicious sequences (e.g., read credentials then make a network call).
 
 ### Pre-execution safety
 
@@ -157,37 +157,37 @@ Produces a session activity report with anomaly scoring — flags scope creep, u
   Proceed? (y/n)
 ```
 
-This is behavioral guidance, not runtime interception — Claude consults the skill's rubric when it recognizes a potentially dangerous command. For hard enforcement (blocking commands at the shell level), see the roadmap below.
+This is behavioral guidance, not runtime interception - Claude consults the skill's rubric when it recognizes a potentially dangerous command. For hard enforcement (blocking commands at the shell level), see the roadmap below.
 
 ## What This Is (and Isn't)
 
-**This is** behavioral guidance for your AI coding agent — instructions that teach it to check for threats and pause before dangerous operations. It works because modern agents (Claude, Codex, Gemini) follow well-structured instructions reliably.
+**This is** behavioral guidance for your AI coding agent - instructions that teach it to check for threats and pause before dangerous operations. It works because modern agents (Claude, Codex, Gemini) follow well-structured instructions reliably.
 
-**This is not** a runtime enforcement engine. It cannot *prevent* a determined attacker from bypassing it, just as a code review cannot prevent all bugs. It catches the common cases — the 36.82% — and makes you aware before damage is done.
+**This is not** a runtime enforcement engine. It cannot *prevent* a determined attacker from bypassing it, just as a code review cannot prevent all bugs. It catches the common cases - the 36.82% - and makes you aware before damage is done.
 
 ## Built on Real Security Expertise
 
 safe-agent isn't another weekend prompt engineering project. The threat patterns and detection heuristics come from:
 
-- **[Flare](https://github.com/ArielSmoliar/flare-ai)** — AI-powered anomaly detection for cloud audit logs, where we built and battle-tested Claude-based security analysis that scores anomalies 0-100 with baseline tracking and false-positive filtering
-- **[LOCO](https://github.com/ArielSmoliar/loco-agent)** — Load-aware scheduling for multi-agent systems, where we learned how agents compete for resources and where budget/authorization guardrails matter most
+- **[Flare](https://github.com/ArielSmoliar/flare-ai)** - AI-powered anomaly detection for cloud audit logs, where we built and battle-tested Claude-based security analysis that scores anomalies 0-100 with baseline tracking and false-positive filtering
+- **[LOCO](https://github.com/ArielSmoliar/loco-agent)** - Load-aware scheduling for multi-agent systems, where we learned how agents compete for resources and where budget/authorization guardrails matter most
 
 ## Roadmap
 
-**v0.2 — Cross-skill coordination**
-- [ ] Unified policy engine — behavior-watch detection triggers tool-guard restrictions automatically
-- [ ] Multi-command exfiltration detection — catch split `cat .env > /tmp/x && curl -d @/tmp/x` across separate commands
-- [ ] Pre-exec-check user-intent awareness — distinguish "user asked for force-push" from "agent decided to force-push"
+**v0.2 - Cross-skill coordination**
+- [ ] Unified policy engine - behavior-watch detection triggers tool-guard restrictions automatically
+- [ ] Multi-command exfiltration detection - catch split `cat .env > /tmp/x && curl -d @/tmp/x` across separate commands
+- [ ] Pre-exec-check user-intent awareness - distinguish "user asked for force-push" from "agent decided to force-push"
 
-**v0.3 — Deeper coverage**
-- [ ] MCP server audit — Extend skill-verify to scan MCP server configurations for trust boundary violations
-- [ ] Hook-based enforcement — Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
-- [ ] Resource exhaustion detection — catch infinite loops, memory bombs, bandwidth abuse within single commands
-- [ ] Output/response tampering detection — detect if a malicious skill modifies tool output
+**v0.3 - Deeper coverage**
+- [ ] MCP server audit - Extend skill-verify to scan MCP server configurations for trust boundary violations
+- [ ] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
+- [ ] Resource exhaustion detection - catch infinite loops, memory bombs, bandwidth abuse within single commands
+- [ ] Output/response tampering detection - detect if a malicious skill modifies tool output
 
-**v0.4 — Persistence and teams**
-- [ ] Cross-session memory — Track behavior baselines across sessions to detect drift over time
-- [ ] Team profiles — Shareable tool-guard presets for org-wide security policies
+**v0.4 - Persistence and teams**
+- [ ] Cross-session memory - Track behavior baselines across sessions to detect drift over time
+- [ ] Team profiles - Shareable tool-guard presets for org-wide security policies
 
 ## License
 
@@ -195,4 +195,4 @@ MIT
 
 ## Contributing
 
-Issues and PRs welcome. If you find a threat pattern we don't catch, open an issue — that's the most valuable contribution.
+Issues and PRs welcome. If you find a threat pattern we don't catch, open an issue - that's the most valuable contribution.
