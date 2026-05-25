@@ -57,10 +57,9 @@ safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Archi
 /plugin install safe-agent
 ```
 
-**Claude Code / Antigravity / Cursor / Codex (manual):**
+**Antigravity / Cursor / Codex:**
 ```bash
 git clone https://github.com/ArielSmoliar/safe-agent.git
-cp -r safe-agent/skills/* .claude/skills/      # Claude Code
 cp -r safe-agent/skills/* .antigravity/skills/  # Antigravity
 cp -r safe-agent/skills/* .cursor/skills/       # Cursor
 cp -r safe-agent/skills/* .codex/skills/        # Codex
