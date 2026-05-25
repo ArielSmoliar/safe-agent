@@ -25,6 +25,20 @@ Every time you run `/plugin install` or `npx skills add`, you're trusting someon
 
 safe-agent adds a verification step.
 
+## Threat Coverage
+
+safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Architecture, Threat Taxonomy, and Security Analysis*](https://arxiv.org/abs/2604.02837) (Li et al., 2026) — the first comprehensive academic security analysis of the Agent Skills framework, covering 7 threat categories and 17 attack scenarios across 3 layers:
+
+| Layer | Category | safe-agent coverage |
+|---|---|---|
+| 1: Delivery & Trust | T1: Supply chain (typosquatting, repo hijacking) | `/skill-verify` |
+| | T2: Consent abuse (persistent permissions, post-install modification) | `/skill-verify` |
+| 2: Runtime Attack | T3: Prompt injection (direct + indirect) | `/skill-verify` |
+| | T4: Code execution (malicious scripts, remote code fetch) | `/skill-verify` + `pre-exec-check` |
+| | T5: Data exfiltration (credentials, env vars, codebase) | `/skill-verify` + `/behavior-watch` |
+| 3: Persistent & Lateral | T6: Persistence (memory poisoning, config injection) | `/skill-verify` + `/behavior-watch` |
+| | T7: Multi-agent propagation | `/behavior-watch` (roadmap: v0.2) |
+
 ## Skills
 
 | Skill | What it does | Lineage |
