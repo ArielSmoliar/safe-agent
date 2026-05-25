@@ -163,7 +163,7 @@ This is behavioral guidance, not runtime interception - Claude consults the skil
 
 safe-agent isn't another weekend prompt engineering project. The threat patterns and detection heuristics come from:
 
-- **[Flare](https://github.com/ArielSmoliar/flare-ai)** - AI-powered anomaly detection for cloud audit logs, where we built and battle-tested Claude-based security analysis that scores anomalies 0-100 with baseline tracking and false-positive filtering
+- **[Flare]([https://www.tryflare.ai/])** - AI-powered anomaly detection for cloud audit logs, where we built and battle-tested Claude-based security analysis that scores anomalies 0-100 with baseline tracking and false-positive filtering
 - **[LOCO](https://github.com/ArielSmoliar/loco-agent)** - Load-aware scheduling for multi-agent systems, where we learned how agents compete for resources and where budget/authorization guardrails matter most
 
 ## Roadmap
