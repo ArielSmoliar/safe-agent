@@ -51,24 +51,19 @@ safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Archi
 
 ## Install
 
-**Claude Code (plugin):**
+**Claude Code:**
 ```
 /plugin marketplace add ArielSmoliar/safe-agent
 /plugin install safe-agent
 ```
 
-**Antigravity / Gemini CLI / Cursor / Codex:**
+**Claude Code / Antigravity / Cursor / Codex (manual):**
 ```bash
 git clone https://github.com/ArielSmoliar/safe-agent.git
 cp -r safe-agent/skills/* .claude/skills/      # Claude Code
 cp -r safe-agent/skills/* .antigravity/skills/  # Antigravity
 cp -r safe-agent/skills/* .cursor/skills/       # Cursor
 cp -r safe-agent/skills/* .codex/skills/        # Codex
-```
-
-**skills.sh (any agent):**
-```bash
-npx skills@latest add ArielSmoliar/safe-agent
 ```
 
 Skills use the universal SKILL.md format (agentskills.io standard) - they work with any compatible agent.
