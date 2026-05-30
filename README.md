@@ -37,7 +37,7 @@ safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Archi
 | | T4: Code execution (malicious scripts, remote code fetch) | `/skill-verify` + `pre-exec-check` |
 | | T5: Data exfiltration (credentials, env vars, codebase) | `/skill-verify` + `/behavior-watch` |
 | 3: Persistent & Lateral | T6: Persistence (memory poisoning, config injection) | `/skill-verify` + `/behavior-watch` |
-| | T7: Multi-agent propagation | `/behavior-watch` (roadmap: v0.2) |
+| | T7: Multi-agent propagation | `/behavior-watch` + multi-agent detection (roadmap: v0.2) |
 
 ## Skills
 
@@ -171,17 +171,19 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 **v0.2 - Cross-skill coordination**
 - [ ] Unified policy engine - behavior-watch detection triggers tool-guard restrictions automatically
 - [ ] Multi-command exfiltration detection - catch split `cat .env > /tmp/x && curl -d @/tmp/x` across separate commands
-- [ ] Pre-exec-check user-intent awareness - distinguish "user asked for force-push" from "agent decided to force-push"
+- [ ] Multi-agent propagation detection - detect when a compromised agent attempts to inject instructions into other agents' contexts (T7 coverage)
+- [ ] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
 
 **v0.3 - Deeper coverage**
-- [ ] MCP server audit - Extend skill-verify to scan MCP server configurations for trust boundary violations
-- [ ] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
+- [ ] MCP server audit - extend skill-verify to scan MCP server configurations for trust boundary violations
+- [ ] Pre-exec-check user-intent awareness - distinguish "user asked for force-push" from "agent decided to force-push" (experimental - requires agent introspection)
 - [ ] Resource exhaustion detection - catch infinite loops, memory bombs, bandwidth abuse within single commands
 - [ ] Output/response tampering detection - detect if a malicious skill modifies tool output
+- [ ] Supply chain integrity - hash pinning and provenance checking for installed skills, detect post-install modification
 
 **v0.4 - Persistence and teams**
-- [ ] Cross-session memory - Track behavior baselines across sessions to detect drift over time
-- [ ] Team profiles - Shareable tool-guard presets for org-wide security policies
+- [ ] Cross-session memory - track behavior baselines across sessions to detect drift over time
+- [ ] Team profiles - shareable tool-guard presets for org-wide security policies
 
 ## License
 
