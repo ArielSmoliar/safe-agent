@@ -174,12 +174,23 @@ To enable, merge `hooks/settings.example.json` into your project's `.claude/sett
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/post-tool-use.sh"
+          }
+        ]
+      }
     ]
   }
 }
 ```
 
-The hook blocks CRITICAL-tier patterns:
+**PreToolUse hook** (`pre-exec-check.sh`) blocks CRITICAL-tier patterns:
 - `rm -rf /`, `rm -rf ~`, `rm -rf .` (catastrophic deletes)
 - Path traversal deletes (`rm -rf ../../`)
 - Force-push to main/master/production
@@ -192,14 +203,31 @@ The hook blocks CRITICAL-tier patterns:
 - Credentials in URL query parameters
 - `pkill -9` / `killall -9` (force-kill by name)
 
-When blocked, the agent receives feedback with a safer alternative:
+**PostToolUse hook** (`post-tool-use.sh`) tracks session state and enables cross-tool enforcement:
+- Logs every tool call to a session state file
+- Flags credential file access (via Read tool or Bash `cat`)
+- Flags writes to shell config (`.bashrc`, `.zshrc`) and agent config
+- Detects exfiltration staging (credential read followed by `/tmp` write)
+
+**Unified policy engine** -- the two hooks work together to catch multi-step attack chains that no single-command check could detect:
+
+| Attack chain | How it's caught |
+|---|---|
+| Read `~/.aws/credentials` then `curl` to exfiltrate | PostToolUse flags credential access; PreToolUse blocks all network commands for the rest of the session |
+| `cat .env` then `wget --post-file` | Same -- any credential read taints the session, blocking `curl`, `wget`, `scp`, `nc`, `ssh` |
+| Edit `.bashrc` then `source ~/.bashrc` | PostToolUse flags shell config write; PreToolUse blocks sourcing the modified config |
+| Read credentials, write to `/tmp`, then upload | PostToolUse detects staging pattern; PreToolUse blocks the upload |
+
+When blocked, the agent receives feedback with context:
 
 ```
-BLOCKED by safe-agent pre-exec-check hook: Force-push to protected branch (main/master/production).
-Suggestion: Use 'git push --force-with-lease' on a feature branch instead.
+BLOCKED by safe-agent pre-exec-check hook: Network command after credential file
+access (exfiltration risk). A credential file was read earlier in this session --
+network commands are blocked until the session ends.
+Suggestion: If this is legitimate, start a new session without reading credential files first.
 ```
 
-The behavioral `pre-exec-check` skill and the hook are complementary -- the hook handles hard stops, the skill handles nuanced context-aware warnings.
+The behavioral `pre-exec-check` skill and the hooks are complementary -- the hooks handle deterministic hard stops, the skill handles nuanced context-aware warnings for HIGH/MEDIUM risks.
 
 ## What This Is (and Isn't)
 
@@ -219,8 +247,8 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 ## Roadmap
 
 **v0.2 - Cross-skill coordination**
-- [ ] Unified policy engine - behavior-watch detection triggers tool-guard restrictions automatically
-- [ ] Multi-command exfiltration detection - catch split `cat .env > /tmp/x && curl -d @/tmp/x` across separate commands
+- [x] Unified policy engine - PostToolUse tracks session state, PreToolUse enforces cross-tool policies (credential access blocks network egress, config writes block sourcing)
+- [x] Multi-command exfiltration detection - PostToolUse flags credential reads, PreToolUse blocks subsequent network commands across separate tool calls
 - [ ] Multi-agent propagation detection - detect when a compromised agent attempts to inject instructions into other agents' contexts (T7 coverage)
 - [x] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
 

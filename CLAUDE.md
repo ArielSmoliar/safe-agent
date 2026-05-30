@@ -10,7 +10,7 @@ Security skills for AI coding agents. This repo follows the agentskills.io stand
 - `skills/behavior-watch/` — Behavioral anomaly detection on agent actions (from Flare anomaly engine)
 - `skills/pre-exec-check/` — Pre-execution safety checks for destructive commands (from Flare heuristics)
 - `tests/fixtures/` — Test skills (safe and malicious) for validating skill-verify
-- `hooks/` — Deterministic Claude Code hooks for hard blocking (PreToolUse enforcement)
+- `hooks/` — Deterministic Claude Code hooks (PreToolUse blocking + PostToolUse session state tracking)
 - `.claude-plugin/` — Plugin manifests for Claude Code marketplace
 
 ## How the skills compose
@@ -30,6 +30,8 @@ Cross-skill references:
 - `hooks/pre-exec-check.sh` complements the behavioral `pre-exec-check` skill (hook
   provides deterministic blocking for CRITICAL patterns; skill provides context-aware
   warnings for HIGH/MEDIUM patterns)
+- `hooks/post-tool-use.sh` tracks session state and enables cross-tool enforcement
+  (e.g., credential read via Read tool blocks subsequent network commands via Bash)
 - `skill-verify` is standalone — run it before the session, not during
 
 ## Development guidelines

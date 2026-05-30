@@ -137,5 +137,41 @@ if echo "$COMMAND" | grep -qE '\b(pkill|killall)\s+-9\b'; then
         "Use 'pkill -15' (SIGTERM) to allow graceful shutdown, or target a specific PID."
 fi
 
-# --- Pass: no CRITICAL patterns matched ---
+# --- POLICY ENGINE: cross-tool enforcement via session state ---
+# PostToolUse hook (post-tool-use.sh) sets flags when it detects red-flag
+# patterns (credential access, config writes, etc.). This section reads
+# those flags and blocks commands that would complete an attack chain.
+
+STATE_DIR="/tmp/safe-agent"
+FLAGS_FILE="$STATE_DIR/$PPID.flags"
+
+if [ -f "$FLAGS_FILE" ]; then
+
+  # Block network egress after credential access (exfiltration prevention)
+  if grep -q "credential_accessed" "$FLAGS_FILE" 2>/dev/null; then
+    if echo "$COMMAND" | grep -qE '\b(curl|wget|nc|ncat|ssh|scp|rsync|ftp|sftp)\b'; then
+      block "Network command after credential file access (exfiltration risk). A credential file was read earlier in this session -- network commands are blocked until the session ends." \
+            "If this is legitimate, start a new session without reading credential files first."
+    fi
+  fi
+
+  # Block network egress after exfiltration staging detected
+  if grep -q "exfil_staging" "$FLAGS_FILE" 2>/dev/null; then
+    if echo "$COMMAND" | grep -qE '\b(curl|wget|nc|ncat)\b'; then
+      block "Network command after data was staged to /tmp following credential access. This matches a known exfiltration pattern: read credentials, write to /tmp, then upload." \
+            "If this is legitimate, start a new session."
+    fi
+  fi
+
+  # Block shell execution after shell config was modified (persistence prevention)
+  if grep -q "shell_config_write" "$FLAGS_FILE" 2>/dev/null; then
+    if echo "$COMMAND" | grep -qE '(source|\.)\s+.*(\.bashrc|\.zshrc|\.profile)'; then
+      block "Sourcing shell config after it was modified in this session. This matches a persistence pattern: write to .bashrc, then source it to activate." \
+            "Review the changes to your shell config before sourcing it."
+    fi
+  fi
+
+fi
+
+# --- Pass: no patterns matched ---
 exit 0
