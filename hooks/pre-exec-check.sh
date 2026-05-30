@@ -20,8 +20,11 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
 
-INPUT=$(cat)
-COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+TMPINPUT=$(mktemp)
+trap 'rm -f "$TMPINPUT"' EXIT
+cat > "$TMPINPUT"
+
+COMMAND=$(jq -r '.tool_input.command // empty' < "$TMPINPUT")
 
 if [ -z "$COMMAND" ]; then
   exit 0

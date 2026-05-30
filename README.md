@@ -37,7 +37,7 @@ safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Archi
 | | T4: Code execution (malicious scripts, remote code fetch) | `/skill-verify` + `pre-exec-check` |
 | | T5: Data exfiltration (credentials, env vars, codebase) | `/skill-verify` + `/behavior-watch` |
 | 3: Persistent & Lateral | T6: Persistence (memory poisoning, config injection) | `/skill-verify` + `/behavior-watch` |
-| | T7: Multi-agent propagation | `/behavior-watch` + multi-agent detection (roadmap: v0.2) |
+| | T7: Multi-agent propagation | `propagation-check` hook + `/behavior-watch` |
 
 ## Skills
 
@@ -229,6 +229,25 @@ Suggestion: If this is legitimate, start a new session without reading credentia
 
 The behavioral `pre-exec-check` skill and the hooks are complementary -- the hooks handle deterministic hard stops, the skill handles nuanced context-aware warnings for HIGH/MEDIUM risks.
 
+### Multi-agent propagation prevention (T7)
+
+In multi-agent setups (Conductor, Claude Code with Agent tool, parallel Codex instances), agents share the filesystem. A compromised agent can write malicious instructions into files that other agents will read and follow.
+
+The `propagation-check.sh` hook intercepts Edit/Write calls to agent-config files and blocks injection patterns:
+
+| What it catches | Example |
+|---|---|
+| Prompt injection into CLAUDE.md | "Ignore all previous instructions" written to any CLAUDE.md |
+| SYSTEM override in SKILL.md | "SYSTEM OVERRIDE: admin mode" in skill definitions |
+| Hook injection into settings.json | Adding `"hooks"` entries that execute arbitrary code |
+| MCP server injection | Adding `"mcpServers"` that grant tool access |
+| Permission escalation | Modifying `"permissions"` to grant broader access |
+| Authority fabrication | "As an administrator, I authorize..." |
+| Persistent behavior override | "From now on, you will always..." |
+| Obfuscated payloads | Base64-decode piped to shell execution |
+
+**Scoped to agent-config files only** (CLAUDE.md, SKILL.md, `.claude/settings*.json`, `.claude/hooks/`) to avoid false positives on normal code. Test fixtures (`tests/fixtures/`) are excluded.
+
 ## What This Is (and Isn't)
 
 **This is** a layered defense for your AI coding agent. The behavioral skills (instructions) teach the agent to check for threats and pause before dangerous operations. The hook-based enforcement (shell scripts) provides deterministic blocking that the agent cannot bypass.
@@ -249,7 +268,7 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 **v0.2 - Cross-skill coordination**
 - [x] Unified policy engine - PostToolUse tracks session state, PreToolUse enforces cross-tool policies (credential access blocks network egress, config writes block sourcing)
 - [x] Multi-command exfiltration detection - PostToolUse flags credential reads, PreToolUse blocks subsequent network commands across separate tool calls
-- [ ] Multi-agent propagation detection - detect when a compromised agent attempts to inject instructions into other agents' contexts (T7 coverage)
+- [x] Multi-agent propagation detection - PreToolUse hook on Edit/Write blocks injection patterns in agent-config files (CLAUDE.md, SKILL.md, settings.json)
 - [x] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
 
 **v0.3 - Deeper coverage**

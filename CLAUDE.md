@@ -32,6 +32,8 @@ Cross-skill references:
   warnings for HIGH/MEDIUM patterns)
 - `hooks/post-tool-use.sh` tracks session state and enables cross-tool enforcement
   (e.g., credential read via Read tool blocks subsequent network commands via Bash)
+- `hooks/propagation-check.sh` prevents multi-agent propagation (T7) by blocking
+  injection patterns written to agent-config files (CLAUDE.md, SKILL.md, settings.json)
 - `skill-verify` is standalone — run it before the session, not during
 
 ## Development guidelines

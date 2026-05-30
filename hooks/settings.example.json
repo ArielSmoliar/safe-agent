@@ -9,6 +9,15 @@
             "command": "hooks/pre-exec-check.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/propagation-check.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [

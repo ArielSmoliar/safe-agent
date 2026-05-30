@@ -14,9 +14,12 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 0
 fi
 
-INPUT=$(cat)
-TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
-TOOL_INPUT=$(echo "$INPUT" | jq -c '.tool_input // {}')
+TMPINPUT=$(mktemp)
+trap 'rm -f "$TMPINPUT"' EXIT
+cat > "$TMPINPUT"
+
+TOOL_NAME=$(jq -r '.tool_name // empty' < "$TMPINPUT")
+TOOL_INPUT=$(jq -c '.tool_input // {}' < "$TMPINPUT")
 
 if [ -z "$TOOL_NAME" ]; then
   exit 0
@@ -40,13 +43,13 @@ CREDENTIAL_PATHS='\.env|\.aws/credentials|\.aws/config|\.ssh/id_|\.ssh/id_rsa|\.
 
 case "$TOOL_NAME" in
   Read)
-    FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+    FILE_PATH=$(jq -r '.tool_input.file_path // empty' < "$TMPINPUT")
     if echo "$FILE_PATH" | grep -qE "$CREDENTIAL_PATHS"; then
       echo "credential_accessed=$TS:$FILE_PATH" >> "$FLAGS_FILE"
     fi
     ;;
   Bash)
-    COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+    COMMAND=$(jq -r '.tool_input.command // empty' < "$TMPINPUT")
     # Detect credential reads via shell commands
     if echo "$COMMAND" | grep -qE "(cat|head|tail|less|more|bat)\s+.*(${CREDENTIAL_PATHS})"; then
       echo "credential_accessed=$TS:bash_read" >> "$FLAGS_FILE"
@@ -61,7 +64,7 @@ case "$TOOL_NAME" in
     fi
     ;;
   Edit|Write)
-    FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty')
+    FILE_PATH=$(jq -r '.tool_input.file_path // empty' < "$TMPINPUT")
     # Detect writes to agent config (persistence attempt)
     if echo "$FILE_PATH" | grep -qE '\.(claude|cursor|codex)/(settings|config)'; then
       echo "config_write=$TS:$FILE_PATH" >> "$FLAGS_FILE"
@@ -76,7 +79,7 @@ esac
 # --- Sequence detection: credential access followed by network prep ---
 # Check if credentials were accessed recently (within last 60 seconds)
 if [ -f "$FLAGS_FILE" ] && [ "$TOOL_NAME" = "Bash" ]; then
-  COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
+  COMMAND=$(jq -r '.tool_input.command // empty' < "$TMPINPUT")
   # If this Bash call writes to /tmp, and credentials were recently accessed,
   # flag as potential staging for exfiltration
   if echo "$COMMAND" | grep -qE '>\s*/tmp/' && grep -q "credential_accessed" "$FLAGS_FILE" 2>/dev/null; then
