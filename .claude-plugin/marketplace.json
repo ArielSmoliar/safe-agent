@@ -6,14 +6,14 @@
   },
   "metadata": {
     "description": "Security skills that make AI coding agents safe to run.",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "plugins": [
     {
       "name": "safe-agent",
       "source": "./",
       "description": "5 security skills: skill verification, cost tracking, tool authorization, behavioral anomaly detection, and pre-execution safety checks.",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "author": {
         "name": "Ariel Smoliar"
       },

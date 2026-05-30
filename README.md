@@ -151,13 +151,63 @@ Produces a session activity report with anomaly scoring - flags scope creep, unu
   Proceed? (y/n)
 ```
 
-This is behavioral guidance, not runtime interception - Claude consults the skill's rubric when it recognizes a potentially dangerous command. For hard enforcement (blocking commands at the shell level), see the roadmap below.
+The behavioral skill handles context-aware warnings and safer alternatives for HIGH/MEDIUM risks. For CRITICAL patterns that are never safe, safe-agent also ships a **deterministic hook** that blocks commands before they execute.
+
+### Hook-based enforcement (deterministic blocking)
+
+For hard enforcement that the agent cannot bypass, safe-agent includes a Claude Code hook that intercepts Bash commands before execution. Unlike behavioral guidance, hooks run outside the agent's context -- a compromised skill or prompt injection cannot override them.
+
+**Prerequisite:** [jq](https://jqlang.github.io/jq/download/) must be installed. If jq is missing, the hook warns and fails open (commands are not blocked).
+
+To enable, merge `hooks/settings.example.json` into your project's `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/pre-exec-check.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The hook blocks CRITICAL-tier patterns:
+- `rm -rf /`, `rm -rf ~`, `rm -rf .` (catastrophic deletes)
+- Path traversal deletes (`rm -rf ../../`)
+- Force-push to main/master/production
+- `git clean -fd` (irreversible untracked file deletion)
+- `DROP TABLE`, `DROP DATABASE`, `TRUNCATE TABLE`
+- `DELETE FROM` without `WHERE`
+- `chmod -R 777` / `chmod -R 000`
+- Reading credential files (`.env`, `~/.aws/credentials`, `~/.ssh/id_*`)
+- Credentials piped to `curl`/`wget` (exfiltration pattern)
+- Credentials in URL query parameters
+- `pkill -9` / `killall -9` (force-kill by name)
+
+When blocked, the agent receives feedback with a safer alternative:
+
+```
+BLOCKED by safe-agent pre-exec-check hook: Force-push to protected branch (main/master/production).
+Suggestion: Use 'git push --force-with-lease' on a feature branch instead.
+```
+
+The behavioral `pre-exec-check` skill and the hook are complementary -- the hook handles hard stops, the skill handles nuanced context-aware warnings.
 
 ## What This Is (and Isn't)
 
-**This is** behavioral guidance for your AI coding agent - instructions that teach it to check for threats and pause before dangerous operations. It works because modern agents (Claude, Codex, Gemini) follow well-structured instructions reliably.
+**This is** a layered defense for your AI coding agent. The behavioral skills (instructions) teach the agent to check for threats and pause before dangerous operations. The hook-based enforcement (shell scripts) provides deterministic blocking that the agent cannot bypass.
 
-**This is not** a runtime enforcement engine. It cannot *prevent* a determined attacker from bypassing it, just as a code review cannot prevent all bugs. It catches the common cases - the 36.82% - and makes you aware before damage is done.
+**Behavioral guidance** works because modern agents (Claude, Codex, Gemini) follow well-structured instructions reliably. It catches the common cases -- the 36.82% of flawed skills -- and handles context-aware risk assessment.
+
+**Hook enforcement** works because it runs outside the agent's context. It cannot be overridden by prompt injection or compromised skills. It handles the CRITICAL patterns where no context matters.
 
 ## Built on Real Security Expertise
 
@@ -172,7 +222,7 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 - [ ] Unified policy engine - behavior-watch detection triggers tool-guard restrictions automatically
 - [ ] Multi-command exfiltration detection - catch split `cat .env > /tmp/x && curl -d @/tmp/x` across separate commands
 - [ ] Multi-agent propagation detection - detect when a compromised agent attempts to inject instructions into other agents' contexts (T7 coverage)
-- [ ] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
+- [x] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
 
 **v0.3 - Deeper coverage**
 - [ ] MCP server audit - extend skill-verify to scan MCP server configurations for trust boundary violations

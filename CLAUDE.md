@@ -10,6 +10,7 @@ Security skills for AI coding agents. This repo follows the agentskills.io stand
 - `skills/behavior-watch/` — Behavioral anomaly detection on agent actions (from Flare anomaly engine)
 - `skills/pre-exec-check/` — Pre-execution safety checks for destructive commands (from Flare heuristics)
 - `tests/fixtures/` — Test skills (safe and malicious) for validating skill-verify
+- `hooks/` — Deterministic Claude Code hooks for hard blocking (PreToolUse enforcement)
 - `.claude-plugin/` — Plugin manifests for Claude Code marketplace
 
 ## How the skills compose
@@ -26,6 +27,9 @@ Cross-skill references:
 - `behavior-watch` suggests `tool-guard` and `cost-guard` actions in its remediation
 - `pre-exec-check` complements `tool-guard` (pre-exec-check catches dangerous commands
   even when Bash is allowed; tool-guard gates the tool itself)
+- `hooks/pre-exec-check.sh` complements the behavioral `pre-exec-check` skill (hook
+  provides deterministic blocking for CRITICAL patterns; skill provides context-aware
+  warnings for HIGH/MEDIUM patterns)
 - `skill-verify` is standalone — run it before the session, not during
 
 ## Development guidelines
@@ -57,9 +61,15 @@ Run each skill against real scenarios to validate:
 # ... do various tool calls, then:
 /safe-agent:behavior-watch
 
-# Test pre-exec-check
+# Test pre-exec-check (behavioral)
 # ... ask the agent to run `rm -rf /` or `git push --force origin main`
 # ... verify it warns before proceeding
+
+# Test pre-exec-check hook (deterministic)
+echo '{"tool_input":{"command":"rm -rf /"}}' | ./hooks/pre-exec-check.sh
+# ... should exit 2 with BLOCKED message
+echo '{"tool_input":{"command":"npm test"}}' | ./hooks/pre-exec-check.sh
+# ... should exit 0 (allowed)
 ```
 
 ## Contributing new threat patterns
