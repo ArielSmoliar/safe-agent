@@ -265,18 +265,18 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 
 ## Roadmap
 
-**v0.2 - Cross-skill coordination**
-- [x] Unified policy engine - PostToolUse tracks session state, PreToolUse enforces cross-tool policies (credential access blocks network egress, config writes block sourcing)
-- [x] Multi-command exfiltration detection - PostToolUse flags credential reads, PreToolUse blocks subsequent network commands across separate tool calls
-- [x] Multi-agent propagation detection - PreToolUse hook on Edit/Write blocks injection patterns in agent-config files (CLAUDE.md, SKILL.md, settings.json)
-- [x] Hook-based enforcement - Shell scripts + Claude Code hooks for hard blocking of dangerous commands (deterministic, not behavioral)
+**v0.2 - Cross-skill coordination** (shipped)
+- [x] Hook-based enforcement - deterministic PreToolUse blocking for CRITICAL-tier commands
+- [x] Unified policy engine - PostToolUse session state tracking + PreToolUse cross-tool enforcement
+- [x] Multi-command exfiltration detection - credential access blocks network egress across tool calls
+- [x] Multi-agent propagation detection - blocks injection patterns in agent-config files (T7)
 
 **v0.3 - Deeper coverage**
 - [ ] MCP server audit - extend skill-verify to scan MCP server configurations for trust boundary violations
-- [ ] Pre-exec-check user-intent awareness - distinguish "user asked for force-push" from "agent decided to force-push" (experimental - requires agent introspection)
+- [ ] Supply chain integrity - hash pinning and provenance checking for installed skills, detect post-install modification
 - [ ] Resource exhaustion detection - catch infinite loops, memory bombs, bandwidth abuse within single commands
 - [ ] Output/response tampering detection - detect if a malicious skill modifies tool output
-- [ ] Supply chain integrity - hash pinning and provenance checking for installed skills, detect post-install modification
+- [ ] Pre-exec-check user-intent awareness - distinguish "user asked for force-push" from "agent decided to force-push" (experimental)
 
 **v0.4 - Persistence and teams**
 - [ ] Cross-session memory - track behavior baselines across sessions to detect drift over time
