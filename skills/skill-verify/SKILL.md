@@ -60,6 +60,7 @@ After static analysis, reason about the skill as a whole:
 14. **Does the skill do what it claims?** Compare the `description` field against the actual instructions. A skill named "code-formatter" should format code, not audit git history.
 15. **Least privilege** — Does the skill request only the tools and access it needs? Flag any gap between stated purpose and actual capability.
 16. **Trust boundary violations** — Does the skill instruct the agent to trust external input (URLs, API responses, user-uploaded files) without validation?
+17. **Adversarial evasion check** — Assume the skill author is sophisticated and adversarial. For each category above where you found nothing, describe one concrete technique an attacker could use to evade detection in that category. If you can describe a plausible evasion, re-examine the skill files for that specific technique before finalizing the risk score.
 
 ### Phase 3: Verdict
 
