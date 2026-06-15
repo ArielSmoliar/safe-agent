@@ -256,6 +256,8 @@ The `propagation-check.sh` hook intercepts Edit/Write calls to agent-config file
 
 **Hook enforcement** works because it runs outside the agent's context. It cannot be overridden by prompt injection or compromised skills. It handles the CRITICAL patterns where no context matters.
 
+**What it can't catch:** the hooks operate at the command level, one tool call at a time. They will not catch logic-level misbehavior assembled from many individually-allowed steps -- an agent that reads a file here, transforms it there, and writes it somewhere benign-looking three calls later, where no single step trips a rule. Detecting that requires cross-step behavioral analysis (`behavior-watch`), and even that is heuristic, not a guarantee.
+
 ## Built on Real Security Expertise
 
 safe-agent isn't another weekend prompt engineering project. The threat patterns and detection heuristics come from:
@@ -272,7 +274,8 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 - [x] Multi-agent propagation detection - blocks injection patterns in agent-config files (T7)
 
 **v0.3 - Deeper coverage**
-- [ ] MCP server audit - extend skill-verify to scan MCP server configurations for trust boundary violations
+- [x] Indirect prompt injection static check - skill-verify flags skills that pass untrusted external input (fetched pages, file contents, tool output) into agent context without `<untrusted_data>` isolation
+- [ ] MCP server audit - extend skill-verify to scan MCP server configurations for trust boundary violations (builds on the untrusted-input check above)
 - [ ] Supply chain integrity - hash pinning and provenance checking for installed skills, detect post-install modification
 - [ ] Resource exhaustion detection - catch infinite loops, memory bombs, bandwidth abuse within single commands
 - [ ] Output/response tampering detection - detect if a malicious skill modifies tool output
