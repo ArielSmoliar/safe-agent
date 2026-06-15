@@ -1,7 +1,7 @@
 {
   "name": "safe-agent",
   "description": "Security skills that make AI coding agents safe to run. Skill verification, cost tracking, tool authorization, behavioral anomaly detection, and pre-execution safety checks — built by the creators of Flare (anomaly detection) and LOCO (multi-agent scheduling).",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": {
     "name": "Ariel Smoliar",
     "url": "https://github.com/ArielSmoliar"
