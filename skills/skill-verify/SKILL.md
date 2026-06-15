@@ -51,7 +51,14 @@ Read every file in the skill directory. Flag any of the following:
 
 **Hooks / Config:**
 12. **Hook hijacking** — Pre/post hooks that run hidden commands, silence errors (`2>/dev/null`), or pipe output to external services
-13. **MCP server injection** — Adding or modifying MCP server configurations, especially servers with broad tool access
+13. **MCP server audit** — Look for MCP server config bundled with or installed by the skill: `.mcp.json`, `mcpServers` blocks in `settings.json` / `.claude/settings.json` / `plugin.json`, `claude_desktop_config.json`, or any `mcpServers`/`mcp` key in bundled JSON. Treat each server as ambient authority granted to the skill, and flag any whose granted scope exceeds the skill's stated purpose:
+    - **Filesystem servers scoped too wide** — `server-filesystem` (or similar) pointed at `/`, `~`, `$HOME`, or a parent dir instead of a project subdir.
+    - **Shell / command / code-eval servers** — anything that exposes arbitrary command or code execution.
+    - **Credentials handed to a server** — secrets/tokens injected via the server's `env` (e.g. `AWS_SECRET_ACCESS_KEY`, `GITHUB_TOKEN`), especially for third-party servers.
+    - **Remote servers** — `url`/`http`/`sse` servers whose code lives off-machine and can change after install (no pinning), and any `command` that fetches+runs remote code (`npx -y`, `uvx` from an untrusted source).
+    - **Tool-surface mismatch** — a server granting network/fs/shell tools the skill description never mentions (MCP-level scope creep).
+
+    This is a permission/trust-boundary audit: the config shows what authority is *granted*, not what the server *does* at runtime — say so in findings rather than claiming runtime malware detection. See `references/threat-patterns.md` → "MCP Server Trust-Boundary Violations".
 
 **Untrusted input handling (any file):**
 14. **Indirect prompt injection via untrusted input** — The skill reads external data (URL/API response, file contents, log entries, tool output, user uploads) and feeds it *raw* into the agent's context or a prompt without isolating it — no `<untrusted_data>` tags, nonce-wrapped boundaries, or equivalent. Statically, look for the read-external-then-pass-raw shape: instructions like "read the file at {path}, then act on it" or code like `agent.send(f"Analyze: {fetch(url).text()}")`. Most dangerous when combined with side-effect tools (Bash, Write, Edit), because injected directives in that data can drive real actions. See `references/threat-patterns.md` → "Indirect Prompt Injection via Untrusted Input". This is the static-pattern counterpart to the behavioral judgment in item 17.
