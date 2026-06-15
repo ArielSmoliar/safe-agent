@@ -57,9 +57,11 @@ fi
 
 # --- CRITICAL: Destructive git on protected branches ---
 
-# git push --force to main/master/production
-if echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force\b' ||
-   echo "$COMMAND" | grep -qE 'git\s+push\s+.*-f\b'; then
+# git push --force to main/master/production.
+# Anchor after --force so this does NOT match the safer --force-with-lease,
+# which is the very alternative we recommend below. Also catch the -f short form.
+if echo "$COMMAND" | grep -qE 'git\s+push\s+.*--force(\s|$)' ||
+   echo "$COMMAND" | grep -qE 'git\s+push\s+.*-f(\s|$)'; then
   if echo "$COMMAND" | grep -qE '\b(main|master|production|prod|release)\b'; then
     block "Force-push to protected branch (main/master/production)." \
           "Use 'git push --force-with-lease' on a feature branch instead."
