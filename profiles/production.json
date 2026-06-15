@@ -8,7 +8,7 @@
   },
   "patterns": {
     "deny": [
-      { "tool": "Bash", "match": "rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f[[:space:]]+(/|~)|git[[:space:]]+push[[:space:]]+--force.*(main|master|prod)|DROP[[:space:]]+(TABLE|DATABASE)", "reason": "destructive production command" }
+      { "tool": "Bash", "match": "rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f[[:space:]]+(/|~)|rm[[:space:]]+-[a-zA-Z]*f[a-zA-Z]*r[[:space:]]+(/|~)|git[[:space:]]+push[[:space:]].*(--force([[:space:]]|$)|-f([[:space:]]|$)).*(main|master|prod)|DROP[[:space:]]+(TABLE|DATABASE)", "reason": "destructive production command (--force-with-lease is gated, not denied)" }
     ],
     "gate": [
       { "tool": "Bash", "match": "curl|wget|scp|npm[[:space:]]+publish|pip[[:space:]]+upload", "reason": "network egress or package publish" }

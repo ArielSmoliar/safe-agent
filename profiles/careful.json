@@ -8,11 +8,11 @@
   },
   "patterns": {
     "deny": [
-      { "tool": "Bash", "match": "rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f|git[[:space:]]+push[[:space:]]+--force", "reason": "destructive command" }
+      { "tool": "Bash", "match": "rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f|rm[[:space:]]+-[a-zA-Z]*f[a-zA-Z]*r|git[[:space:]]+push[[:space:]].*(--force([[:space:]]|$)|-f([[:space:]]|$))", "reason": "destructive command (forced delete or force-push; --force-with-lease is allowed)" }
     ],
     "gate": [
       { "tool": "Write", "match": "\\.env|\\.pem|\\.key|credentials", "reason": "write to a sensitive path" }
     ]
   },
-  "default": "allow"
+  "default": "defer"
 }
