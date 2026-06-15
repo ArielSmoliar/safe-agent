@@ -273,17 +273,23 @@ safe-agent isn't another weekend prompt engineering project. The threat patterns
 - [x] Multi-command exfiltration detection - credential access blocks network egress across tool calls
 - [x] Multi-agent propagation detection - blocks injection patterns in agent-config files (T7)
 
-**v0.3 - Deeper coverage**
-- [x] Indirect prompt injection static check - skill-verify flags skills that pass untrusted external input (fetched pages, file contents, tool output) into agent context without `<untrusted_data>` isolation
-- [ ] MCP server audit - extend skill-verify to scan MCP server configurations for trust boundary violations (builds on the untrusted-input check above)
-- [ ] Supply chain integrity - hash pinning and provenance checking for installed skills, detect post-install modification
-- [ ] Resource exhaustion detection - catch infinite loops, memory bombs, bandwidth abuse within single commands
-- [ ] Output/response tampering detection - detect if a malicious skill modifies tool output
-- [ ] Pre-exec-check user-intent awareness - distinguish "user asked for force-push" from "agent decided to force-push" (experimental)
+Priorities below are ordered by leverage on the install/config trust decision that's
+already safe-agent's core. Each item states honest scope: what it can enforce vs. what
+it can only flag.
 
-**v0.4 - Persistence and teams**
-- [ ] Cross-session memory - track behavior baselines across sessions to detect drift over time
-- [ ] Team profiles - shareable tool-guard presets for org-wide security policies
+**v0.3 - Install & config trust** (highest leverage, on-brand)
+- [x] Indirect prompt injection static check - skill-verify flags skills that pass untrusted external input (fetched pages, file contents, tool output) into agent context without `<untrusted_data>` isolation
+- [ ] MCP server audit - extend skill-verify to audit MCP server configs for *permission and trust-boundary* scope (filesystem, shell, network, repo access). Scope: this is a config/permission audit, not runtime malware detection - a static scan can't see what a server does once it runs.
+- [ ] Supply chain integrity - hash pinning + post-install modification detection for installed skills. Ships with an update workflow from day one, or pinning just gets disabled as friction. Provenance/signature checking is best-effort where the ecosystem publishes signals.
+- [ ] Team profiles - shareable, in-repo tool-guard presets so safe defaults are repeatable instead of per-developer. Must enforce via hooks with clear precedence and visible failure modes - a profile that's only documentation changes nothing.
+
+**v0.4 - Runtime policy** (reframed from "detection" to enforcement)
+- [ ] Explicit confirmation contract - replaces fuzzy "user-intent awareness." For high-risk actions (force-push, destructive deletes, DB drops, migrations), require a fresh confirmation that quotes the requested intent and names the exact target (branch/path/db) plus a safer alternative. Inferring intent from conversation is prompt-injectable, so the default stays "confirm."
+- [ ] Runtime resource limits - replaces "resource exhaustion detection." Command text can't reveal an infinite loop or memory bomb; enforce with timeouts, process/output caps, and bandwidth limits at execution time.
+
+**Deferred - needs an enforcement anchor or proven demand**
+- [ ] Output/response tampering detection - real mitigation needs signed tool transcripts or trusted execution logs; without that anchor it's detection language that can't actually verify, so it stays deferred rather than shipped as theater.
+- [ ] Cross-session drift baselines - track behavior baselines across sessions to catch slow drift. Deferred until per-session controls are low-noise and there's real team demand; baselines are noisy, privacy-sensitive, and normal project changes look like drift.
 
 ## License
 
