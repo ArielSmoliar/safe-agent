@@ -31,10 +31,10 @@ safe-agent maps to the threat taxonomy from [*Towards Secure Agent Skills: Archi
 
 | Layer | Category | safe-agent coverage |
 |---|---|---|
-| 1: Delivery & Trust | T1: Supply chain (typosquatting, repo hijacking) | `/skill-verify` |
-| | T2: Consent abuse (persistent permissions, post-install modification) | `/skill-verify` |
+| 1: Delivery & Trust | T1: Supply chain (typosquatting, repo hijacking) | `/skill-verify` + `skill-lock` |
+| | T2: Consent abuse (persistent permissions, post-install modification) | `/skill-verify` + `skill-lock` + `tool-guard` hook |
 | 2: Runtime Attack | T3: Prompt injection (direct + indirect) | `/skill-verify` |
-| | T4: Code execution (malicious scripts, remote code fetch) | `/skill-verify` + `pre-exec-check` |
+| | T4: Code execution (malicious scripts, remote code fetch, MCP servers) | `/skill-verify` (incl. MCP audit) + `pre-exec-check` |
 | | T5: Data exfiltration (credentials, env vars, codebase) | `/skill-verify` + `/behavior-watch` |
 | 3: Persistent & Lateral | T6: Persistence (memory poisoning, config injection) | `/skill-verify` + `/behavior-watch` |
 | | T7: Multi-agent propagation | `propagation-check` hook + `/behavior-watch` |
@@ -248,6 +248,48 @@ The `propagation-check.sh` hook intercepts Edit/Write calls to agent-config file
 
 **Scoped to agent-config files only** (CLAUDE.md, SKILL.md, `.claude/settings*.json`, `.claude/hooks/`) to avoid false positives on normal code. Test fixtures (`tests/fixtures/`) are excluded.
 
+### MCP server audit
+
+`/skill-verify` now audits any MCP server config a skill ships or installs
+(`.mcp.json`, `mcpServers` blocks in `settings.json` / `plugin.json`,
+`claude_desktop_config.json`). It flags servers whose granted authority exceeds
+the skill's stated purpose: filesystem servers scoped to `/` or `~`, shell/code-eval
+servers, secrets handed to a server via `env`, and remote (`url`/`http`/`sse`)
+servers whose code can change after install. This is a permission/trust-boundary
+audit — it shows what authority is granted, not what the server does at runtime.
+
+### Supply chain integrity (post-install modification)
+
+Verifying before install only helps if the files can't silently change afterward.
+`scripts/skill-lock.sh` records a content hash of every file in a skill, then
+detects drift:
+
+```bash
+scripts/skill-lock.sh lock   ~/.claude/skills/some-skill   # record hashes
+scripts/skill-lock.sh verify ~/.claude/skills/some-skill   # exit 1 if any file changed/added/removed
+scripts/skill-lock.sh update ~/.claude/skills/some-skill   # re-lock after an intentional update
+scripts/skill-lock.sh verify-all                           # check everything locked
+```
+
+Hashes live in `safe-agent.lock.json` (commit it). `verify` exits non-zero on
+drift, so it drops into CI or a pre-session check.
+
+### Team profiles (enforceable tool policy)
+
+`/tool-guard` commands are advisory. For deterministic, team-shared enforcement,
+commit a policy and wire the `hooks/tool-guard.sh` PreToolUse hook — it returns a
+real allow / ask / deny decision on every tool call, outside the agent's context:
+
+```bash
+mkdir -p .safe-agent
+cp profiles/careful.json .safe-agent/policy.json   # readonly | careful | untrusted-repo | production
+git add .safe-agent/policy.json                     # the whole team gets the same enforcement
+```
+
+Precedence is deny-first (tool-deny → deny-pattern → gate-pattern → tool-gate →
+tool-allow → default); `gate` maps to a user approval prompt. With no policy file,
+the hook defers to normal permission flow.
+
 ## What This Is (and Isn't)
 
 **This is** a layered defense for your AI coding agent. The behavioral skills (instructions) teach the agent to check for threats and pause before dangerous operations. The hook-based enforcement (shell scripts) provides deterministic blocking that the agent cannot bypass.
@@ -277,11 +319,11 @@ Priorities below are ordered by leverage on the install/config trust decision th
 already safe-agent's core. Each item states honest scope: what it can enforce vs. what
 it can only flag.
 
-**v0.3 - Install & config trust** (highest leverage, on-brand)
+**v0.3 - Install & config trust** (shipped)
 - [x] Indirect prompt injection static check - skill-verify flags skills that pass untrusted external input (fetched pages, file contents, tool output) into agent context without `<untrusted_data>` isolation
-- [ ] MCP server audit - extend skill-verify to audit MCP server configs for *permission and trust-boundary* scope (filesystem, shell, network, repo access). Scope: this is a config/permission audit, not runtime malware detection - a static scan can't see what a server does once it runs.
-- [ ] Supply chain integrity - hash pinning + post-install modification detection for installed skills. Ships with an update workflow from day one, or pinning just gets disabled as friction. Provenance/signature checking is best-effort where the ecosystem publishes signals.
-- [ ] Team profiles - shareable, in-repo tool-guard presets so safe defaults are repeatable instead of per-developer. Must enforce via hooks with clear precedence and visible failure modes - a profile that's only documentation changes nothing.
+- [x] MCP server audit - skill-verify audits MCP server configs for *permission and trust-boundary* scope (filesystem, shell, network, secrets, remote servers). Scope: a config/permission audit, not runtime malware detection - it shows what authority is granted, not what the server does once it runs.
+- [x] Supply chain integrity - `scripts/skill-lock.sh` records a content hash of every file in a skill and detects post-install modification, with a `lock` / `verify` / `update` workflow so pinning doesn't become friction.
+- [x] Team profiles - committable `.safe-agent/policy.json` presets enforced by the `hooks/tool-guard.sh` PreToolUse hook (allow / ask / deny with clear precedence), so safe defaults are repeatable across a team instead of per-developer.
 
 **v0.4 - Runtime policy** (reframed from "detection" to enforcement)
 - [ ] Explicit confirmation contract - replaces fuzzy "user-intent awareness." For high-risk actions (force-push, destructive deletes, DB drops, migrations), require a fresh confirmation that quotes the requested intent and names the exact target (branch/path/db) plus a safer alternative. Inferring intent from conversation is prompt-injectable, so the default stays "confirm."

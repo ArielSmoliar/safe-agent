@@ -10,7 +10,9 @@ Security skills for AI coding agents. This repo follows the agentskills.io stand
 - `skills/behavior-watch/` — Behavioral anomaly detection on agent actions (from Flare anomaly engine)
 - `skills/pre-exec-check/` — Pre-execution safety checks for destructive commands (from Flare heuristics)
 - `tests/fixtures/` — Test skills (safe and malicious) for validating skill-verify
-- `hooks/` — Deterministic Claude Code hooks (PreToolUse blocking + PostToolUse session state tracking)
+- `hooks/` — Deterministic Claude Code hooks (PreToolUse blocking + PostToolUse session state tracking + `tool-guard.sh` policy enforcement)
+- `scripts/` — Standalone CLI tooling (`skill-lock.sh` supply-chain integrity)
+- `profiles/` — Committable tool-guard policy presets (readonly, careful, untrusted-repo, production)
 - `.claude-plugin/` — Plugin manifests for Claude Code marketplace
 
 ## How the skills compose
@@ -74,6 +76,20 @@ echo '{"tool_input":{"command":"rm -rf /"}}' | ./hooks/pre-exec-check.sh
 # ... should exit 2 with BLOCKED message
 echo '{"tool_input":{"command":"npm test"}}' | ./hooks/pre-exec-check.sh
 # ... should exit 0 (allowed)
+
+# Test skill-lock (supply chain integrity)
+export SAFE_AGENT_LOCKFILE=$(mktemp -d)/test.lock.json
+./scripts/skill-lock.sh lock tests/fixtures/safe-skill      # exit 0
+./scripts/skill-lock.sh verify tests/fixtures/safe-skill    # OK, exit 0
+# ... modify a file, then verify should report drift and exit 1
+
+# Test tool-guard hook (policy enforcement)
+echo '{"tool_name":"Bash","tool_input":{"command":"rm -rf build"}}' | \
+  SAFE_AGENT_POLICY=profiles/careful.json ./hooks/tool-guard.sh
+# ... should emit permissionDecision "deny" (destructive pattern)
+echo '{"tool_name":"Read","tool_input":{"file_path":"a.txt"}}' | \
+  SAFE_AGENT_POLICY=profiles/readonly.json ./hooks/tool-guard.sh
+# ... should emit permissionDecision "allow"
 ```
 
 ## Contributing new threat patterns
