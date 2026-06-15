@@ -106,3 +106,8 @@ If no issues are found, say so clearly — do not invent concerns.
 - If the skill is a URL or GitHub repo, clone or fetch it to a temporary location first.
 - If the user passes a directory path, scan that directory.
 - If no argument is given, scan all skills in `.claude/skills/` and report on each.
+- **After a SAFE verdict**, offer to lock the skill's contents so post-install
+  modification is detectable: `scripts/skill-lock.sh lock <skill-dir>`. Verifying
+  before install only protects you if the installed files can't silently change
+  afterward — locking closes that gap (re-run `verify` later; `update` after an
+  intentional change).
