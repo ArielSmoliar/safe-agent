@@ -1,0 +1,11 @@
+{
+  "profile": "untrusted-repo",
+  "description": "Reviewing code you don't trust — read and gated edits, zero shell execution.",
+  "tools": {
+    "allow": ["Read", "Grep", "Glob"],
+    "gate": ["Edit", "Write"],
+    "deny": ["Bash"]
+  },
+  "patterns": {},
+  "default": "deny"
+}

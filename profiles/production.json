@@ -1,0 +1,18 @@
+{
+  "profile": "production",
+  "description": "Production repo — approve all mutations and shell; block destructive ops; gate network egress and publishing.",
+  "tools": {
+    "allow": ["Read", "Grep", "Glob"],
+    "gate": ["Edit", "Write", "Bash"],
+    "deny": []
+  },
+  "patterns": {
+    "deny": [
+      { "tool": "Bash", "match": "rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f[[:space:]]+(/|~)|git[[:space:]]+push[[:space:]]+--force.*(main|master|prod)|DROP[[:space:]]+(TABLE|DATABASE)", "reason": "destructive production command" }
+    ],
+    "gate": [
+      { "tool": "Bash", "match": "curl|wget|scp|npm[[:space:]]+publish|pip[[:space:]]+upload", "reason": "network egress or package publish" }
+    ]
+  },
+  "default": "ask"
+}

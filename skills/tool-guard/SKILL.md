@@ -82,6 +82,41 @@ For convenience, support named profiles:
 
 Usage: `/tool-guard profile readonly`
 
+## Enforceable Team Profiles (hook-based)
+
+The commands above are advisory — they ask the agent to self-restrict. For
+deterministic enforcement that a compromised skill or prompt injection cannot
+talk past, safe-agent ships a PreToolUse hook (`hooks/tool-guard.sh`) that reads
+a committed policy file and decides allow / ask / deny on every tool call,
+outside the agent's context.
+
+Activate a preset by copying it to the project's policy file:
+
+```bash
+mkdir -p .safe-agent
+cp profiles/careful.json .safe-agent/policy.json   # or readonly / untrusted-repo / production
+git add .safe-agent/policy.json                     # commit it — the whole team gets the same enforcement
+```
+
+Wire the hook once via `hooks/settings.example.json` (PreToolUse, matcher `""`).
+Because the policy lives in the repo, "what's enforced here" stops being
+per-developer tribal knowledge.
+
+**Policy format** (`profiles/*.json`):
+- `tools.allow` / `tools.gate` / `tools.deny` — tool names by tier.
+- `patterns.deny` / `patterns.gate` — rules `{tool?, match, reason}` where `match`
+  is an extended regex tested against the command (Bash), file path (Edit/Write/
+  Read), or URL (WebFetch). A rule with no `tool` applies to all tools.
+- `default` — `allow` | `deny` | `ask` for tools not in any list.
+
+**Precedence** (first match wins): tool in `deny` → deny; `patterns.deny` hit →
+deny; `patterns.gate` hit → ask (so "Bash allowed, but `rm` gated" works); tool
+in `gate` → ask; tool in `allow` → allow; else `default`. If no policy file
+exists, the hook defers to normal permission flow (no-op).
+
+The behavioral commands and the hook compose: use a command for a one-off
+session restriction, commit a profile for durable team-wide enforcement.
+
 ## Contextual Gating
 
 Beyond static rules, apply contextual awareness:
@@ -125,10 +160,12 @@ Gated calls this session: 4 (3 approved, 1 skipped)
 
 ## Behavior
 
-- Tool Guard is advisory — it instructs the agent to self-restrict, not a
-  system-level enforcement mechanism. The agent follows these rules because
-  they are well-structured instructions, not because they are technically
-  enforced.
+- The `/tool-guard` commands are advisory — they instruct the agent to
+  self-restrict. The agent follows them because they are well-structured
+  instructions, not because they are technically enforced. For deterministic
+  enforcement that a compromised skill or prompt injection cannot bypass, commit
+  a profile and wire the `hooks/tool-guard.sh` PreToolUse hook (see "Enforceable
+  Team Profiles" above). The two layers compose.
 - Always explain what you would have done with a denied tool, so the user
   can take that action themselves if needed.
 - Never try to work around a denied tool by using a different tool for the

@@ -1,0 +1,11 @@
+{
+  "profile": "readonly",
+  "description": "Investigation only — read, search, delegate. No mutations, no shell.",
+  "tools": {
+    "allow": ["Read", "Grep", "Glob", "Agent"],
+    "gate": [],
+    "deny": ["Edit", "Write", "NotebookEdit", "Bash"]
+  },
+  "patterns": {},
+  "default": "deny"
+}

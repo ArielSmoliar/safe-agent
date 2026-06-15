@@ -1,0 +1,18 @@
+{
+  "profile": "careful",
+  "description": "Read freely; approve every mutation and shell command. Hard-block destructive Bash.",
+  "tools": {
+    "allow": ["Read", "Grep", "Glob"],
+    "gate": ["Edit", "Write", "NotebookEdit", "Bash", "Agent"],
+    "deny": []
+  },
+  "patterns": {
+    "deny": [
+      { "tool": "Bash", "match": "rm[[:space:]]+-[a-zA-Z]*r[a-zA-Z]*f|git[[:space:]]+push[[:space:]]+--force", "reason": "destructive command" }
+    ],
+    "gate": [
+      { "tool": "Write", "match": "\\.env|\\.pem|\\.key|credentials", "reason": "write to a sensitive path" }
+    ]
+  },
+  "default": "allow"
+}

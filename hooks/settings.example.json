@@ -18,6 +18,15 @@
             "command": "hooks/propagation-check.sh"
           }
         ]
+      },
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "hooks/tool-guard.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
